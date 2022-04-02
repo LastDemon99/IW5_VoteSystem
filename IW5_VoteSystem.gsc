@@ -10,8 +10,41 @@ init()
 	level thread OnGameOverServerInit();
 	level thread OnPlayerConnected();
 	level thread OnEndVote();
+    replacefunc(maps\mp\gametypes\_gamelogic::waittillFinalKillcamDone, ::_gamelogic_waittillFinalKillcamDone_custom);
 }
 
+_gamelogic_waittillFinalKillcamDone_custom() 
+{
+	print("_gamelogic::waittillFinalKillcamDone  called...");
+    if (!IsDefined(level.finalkillcam_winner))
+	{
+	    if (isRoundBased() && !wasLastRound())
+	    {
+		    print("not last round");
+		    return false;
+	    }
+	    print("is last round");
+		print("starting vote");
+		wait 3;
+        level notify("vote_start");
+		level waittill("vote_end");
+        return false;
+    }
+
+	print("waiting for killcam to finish");
+    level waittill("final_killcam_done");
+	if (isRoundBased() && !wasLastRound())
+	{
+		print("not last round");
+		return true;
+	}
+	print("is last round");
+	print("starting vote");
+	wait 3;
+    level notify("vote_start");
+	level waittill("vote_end");
+    return true;
+}
 OnPlayerConnected()
 {
     for(;;)
@@ -24,21 +57,29 @@ OnPlayerConnected()
 
 GameSettings()
 {
-	level.postRoundTime = 25;
+	//level.postRoundTime = 25;//fucking delay
 	
-	//setDvar("scr_" + level.gametype + "_timelimit", 0.3);	
-	//setDvar("scr_game_matchstarttime", 0);
-	//setDvar("scr_game_playerwaittime", 0);
+	setDvar("scr_" + level.gametype + "_timelimit", 0.5);	
+	setDvar("scr_" + level.gametype + "_roundlimit", 3);	
+	setDvar("scr_game_matchstarttime", 0);
+	setDvar("scr_game_playerwaittime", 0);
 }
 
 LoadData()
 {
+	level.votetime = 20;
 	shaders = StrTok("background_image;gradient;gradient_fadein;gradient_top", ";");
     foreach(shader in shaders)
         PreCacheShader(shader);
+
+	level.maps = [ "mp_dome;Dome",
+	"mp_seatown;Seatown",
+	"mp_bravo;Mission",
+	"mp_alpha;Lockdown",
+	"mp_hardhat;Hardhat"
+	];
 	
-	//place or remove your preferred maps, and give them a name to display on the screen
-	level.maps = [ "mp_plaza2;Arkaden",
+	/*level.maps = [ "mp_plaza2;Arkaden",
             "mp_mogadishu;Bakaara",
             "mp_bootleg;Bootleg",
             "mp_carbon;Carbon",
@@ -55,8 +96,7 @@ LoadData()
             "mp_underground;Underground",
             "mp_village;Village" ];
             
-			//dlc maps
-			/*"mp_morningwood;Blackbox",
+			"mp_morningwood;Blackbox",
             "mp_park;Liberation",
             "mp_qadeem;Oasis",
             "mp_overwatch;Overwatch",
@@ -68,12 +108,10 @@ LoadData()
             "mp_restrepo_ss;Lookout",
             "mp_courtyard_ss;Erosion",
             "mp_terminal_cls;Terminal" ];*/
+
+	level.dsr = [ "FFA;iSnipe FFA", "SND;iSnipe SND", "HQ;Headquarters" ];
 	
-	//replace this with the dsr of your server and name it the way you like
-	level.dsr = [ "inf;Infected", "jug;Juggernaut", "oic;One in the Chamber", "ffa;Free For All", "tdm;Team Death Match" ];
-	
-	//set your map_count and dsr_count in SetRandomVote();
-	level thread SetRandomVote(6, 4);	
+	level thread SetRandomVote(5, 3);	
 }
 
 SetRandomVote(maps_size, dsr_size)
@@ -97,9 +135,8 @@ SetRandomVote(maps_size, dsr_size)
 
 OnGameOverServerInit()
 {
-	level waittill("game_over");	
-	wait(5);
-	
+	level waittill("vote_start");//game_over
+
 	level thread createTimerHud();
 	
 	createHudText("^7VOTE MAP", "hudsmall", 1.4, "RIGHT", "CENTER", -151, -190, false); 
@@ -138,8 +175,7 @@ OnGameOverServerInit()
 OnGameOverPlayerInit()
 {
 	self endon("disconnect");
-	level waittill("game_over");	
-	wait(5);
+	level waittill("vote_start");	
 	
 	self notifyonplayercommand("up", "+forward");
 	self notifyonplayercommand("down", "+back");
@@ -192,7 +228,7 @@ OnGameOverPlayerInit()
 				level.maps_vote[selected[0]]++;
 				index = 0;
 				
-				self iprintln("^2You has vote map ^1" + getMapAlias(level.maps_index[selected[0]]));
+				self iprintln("^2You have vote map ^1" + getMapAlias(level.maps_index[selected[0]]));
 			}
 			else if (!hasVoted[1])
 			{
@@ -200,7 +236,7 @@ OnGameOverPlayerInit()
 				selected[1] = index;
 				level.dsr_vote[selected[1]]++;
 				
-				self iprintln("^2You has vote mode ^1" + getDsrAlias(level.dsr_index[selected[1]]));
+				self iprintln("^2You have vote mode ^1" + getDsrAlias(level.dsr_index[selected[1]]));
 			}
 		}
 		else if (key == "melee")
@@ -211,7 +247,7 @@ OnGameOverPlayerInit()
 				hasVoted[0] = false;
 				selected[0] = -1;		
 				
-				self iprintln("^2You has ^1denied ^2your vote map");	
+				self iprintln("^2You have ^1denied ^2your vote map");	
 			}
 			else if (hasVoted[1])
 			{
@@ -219,7 +255,7 @@ OnGameOverPlayerInit()
 				hasVoted[1] = false;
 				selected[1] = -1;
 				
-				self iprintln("^2You has ^1denied ^2your vote mode");				
+				self iprintln("^2You have ^1denied ^2your vote mode");				
 			}
 		}
 		wait 0.05;
@@ -241,7 +277,7 @@ UpdateVoteCount()
 
 OnEndVote()
 {
-	level waittill("round_end_finished");
+	level waittill("vote_end");
 	
 	level.winMap = [ 0, 0 ];
 	level.winDSR = [ 0, 0 ];
@@ -258,7 +294,8 @@ OnEndVote()
 	if (level.winDSR[0] == 0 && level.winDSR[1] == 0) level.winDSR[1] = randomIntRange(0, level.dsr_vote.size);	
 	
     setDvar("sv_maprotation", "dsr " + getDsr(level.dsr_index[level.winDSR[1]]) + " map " + getMap(level.maps_index[level.winMap[1]]));
-	cmdexec("start_map_rotate");
+	exitLevel(0);
+	//cmdexec("start_map_rotate");
 }
 
 
@@ -339,10 +376,11 @@ createTimerHud()
 {
 	//the game hide or delete timer on game ended, with createServerTimer()
 	crappy_timer = createHudText("^2Vote end in: ", "hudsmall", 1.4, "RIGHT", "RIGHT", -50, 170, false);
-	for (i = level.postRoundTime - 5; i > 0; i--)
+	for (i = level.votetime; i > 0; i--)
 	{
 		if(i > 5) crappy_timer setText("^2Vote end in: " + i); 
 		else crappy_timer setText("^1Vote end in: " + i); 
 		wait(1);
-	}	
+	}
+	level notify("vote_end");
 }
