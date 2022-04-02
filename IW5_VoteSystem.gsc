@@ -4,7 +4,6 @@
 
 init()
 {
-	GameSettings();
 	LoadData();
 	
 	level thread OnGameOverServerInit();
@@ -52,17 +51,6 @@ OnPlayerConnected()
         level waittill("connected", player);
 		player thread OnGameOverPlayerInit();
     }
-}
-
-
-GameSettings()
-{
-	//level.postRoundTime = 25;//fucking delay
-	
-	setDvar("scr_" + level.gametype + "_timelimit", 0.5);	
-	setDvar("scr_" + level.gametype + "_roundlimit", 3);	
-	setDvar("scr_game_matchstarttime", 0);
-	setDvar("scr_game_playerwaittime", 0);
 }
 
 LoadData()
