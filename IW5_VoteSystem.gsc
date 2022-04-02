@@ -37,6 +37,7 @@ LoadData()
     foreach(shader in shaders)
         PreCacheShader(shader);
 	
+	//place or remove your preferred maps, and give them a name to display on the screen
 	level.maps = [ "mp_plaza2;Arkaden",
             "mp_mogadishu;Bakaara",
             "mp_bootleg;Bootleg",
@@ -54,6 +55,7 @@ LoadData()
             "mp_underground;Underground",
             "mp_village;Village" ];
             
+			//dlc maps
 			/*"mp_morningwood;Blackbox",
             "mp_park;Liberation",
             "mp_qadeem;Oasis",
@@ -66,7 +68,8 @@ LoadData()
             "mp_restrepo_ss;Lookout",
             "mp_courtyard_ss;Erosion",
             "mp_terminal_cls;Terminal" ];*/
-
+	
+    //replace this with the dsr of your server and name it the way you like
 	level.dsr = [ "inf;Infected", "jug;Juggernaut", "oic;One in the Chamber", "ffa;Free For All", "tdm;Team Death Match" ];
 	
 	level thread SetRandomVote(6, 4);	
