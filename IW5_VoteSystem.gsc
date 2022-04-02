@@ -69,9 +69,10 @@ LoadData()
             "mp_courtyard_ss;Erosion",
             "mp_terminal_cls;Terminal" ];*/
 	
-    //replace this with the dsr of your server and name it the way you like
+	//replace this with the dsr of your server and name it the way you like
 	level.dsr = [ "inf;Infected", "jug;Juggernaut", "oic;One in the Chamber", "ffa;Free For All", "tdm;Team Death Match" ];
 	
+	//set your map_count and dsr_count in SetRandomVote();
 	level thread SetRandomVote(6, 4);	
 }
 
