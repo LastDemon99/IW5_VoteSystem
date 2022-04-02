@@ -2,7 +2,8 @@
   <img src="https://github.com/LastDemon99/LastDemon99/blob/main/Data/lb_logo.jpg">
   <br><br>
   <b>IW5_VoteSystem</b><br>
-  <a>GSC script for plutonium, vote map and dsr dynamic hud</a>   
+  <a>GSC script for plutonium, vote map and dsr dynamic hud</a> 
+  <br><br>
   • <a href="#key-features">Key Features</a> •  
   <a href="#how-to-use">How To Use</a> •
   <a href="#download">Download</a> •  
