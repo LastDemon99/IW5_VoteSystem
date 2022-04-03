@@ -6,52 +6,37 @@ init()
 {
 	LoadData();
 	
-	level thread OnGameOverServerInit();
-	level thread OnPlayerConnected();
+	level thread VoteInit();
 	level thread OnEndVote();
+	
     replacefunc(maps\mp\gametypes\_gamelogic::waittillFinalKillcamDone, ::_gamelogic_waittillFinalKillcamDone_custom);
+	
+	//setDvar("scr_" + level.gametype + "_timelimit", 0.1);	
 }
 
 _gamelogic_waittillFinalKillcamDone_custom() 
 {
-	print("_gamelogic::waittillFinalKillcamDone  called...");
     if (!IsDefined(level.finalkillcam_winner))
 	{
 	    if (isRoundBased() && !wasLastRound())
-	    {
-		    print("not last round");
-		    return false;
-	    }
-	    print("is last round");
-		print("starting vote");
+			return false;
+		
 		wait 3;
         level notify("vote_start");
 		level waittill("vote_end");
         return false;
     }
-
-	print("waiting for killcam to finish");
+	
     level waittill("final_killcam_done");
 	if (isRoundBased() && !wasLastRound())
-	{
-		print("not last round");
 		return true;
-	}
-	print("is last round");
-	print("starting vote");
+	
 	wait 3;
     level notify("vote_start");
 	level waittill("vote_end");
     return true;
 }
-OnPlayerConnected()
-{
-    for(;;)
-    {
-        level waittill("connected", player);
-		player thread OnGameOverPlayerInit();
-    }
-}
+
 
 LoadData()
 {
@@ -59,15 +44,8 @@ LoadData()
 	shaders = StrTok("background_image;gradient;gradient_fadein;gradient_top", ";");
     foreach(shader in shaders)
         PreCacheShader(shader);
-
-	level.maps = [ "mp_dome;Dome",
-	"mp_seatown;Seatown",
-	"mp_bravo;Mission",
-	"mp_alpha;Lockdown",
-	"mp_hardhat;Hardhat"
-	];
 	
-	/*level.maps = [ "mp_plaza2;Arkaden",
+	level.maps = [ "mp_plaza2;Arkaden",
             "mp_mogadishu;Bakaara",
             "mp_bootleg;Bootleg",
             "mp_carbon;Carbon",
@@ -84,7 +62,8 @@ LoadData()
             "mp_underground;Underground",
             "mp_village;Village" ];
             
-			"mp_morningwood;Blackbox",
+			//dlc maps
+			/*"mp_morningwood;Blackbox",
             "mp_park;Liberation",
             "mp_qadeem;Oasis",
             "mp_overwatch;Overwatch",
@@ -96,41 +75,24 @@ LoadData()
             "mp_restrepo_ss;Lookout",
             "mp_courtyard_ss;Erosion",
             "mp_terminal_cls;Terminal" ];*/
-
-	level.dsr = [ "FFA;iSnipe FFA", "SND;iSnipe SND", "HQ;Headquarters" ];
 	
-	level thread SetRandomVote(5, 3);	
+	//
+	
+	level.dsr = [ "ffa_sniper;iSnipe FFA", "ffa_os;Old School FFA", "inf_ss;SharpShooter Infected", "tdm_crank;Cranked TDM" ];
+	
+	level thread SetRandomVote(6, 4);	
 }
 
-SetRandomVote(maps_size, dsr_size)
+VoteInit()
 {
-	if(maps_size > 6 || dsr_size > 6) return;
-	if(maps_size > level.maps.size) return;
-	if(dsr_size > level.dsr.size) return;
-	
-	level.maps_index = randomNum(maps_size, 0, level.maps.size);	
-	level.dsr_index = randomNum(dsr_size, 0, level.dsr.size);	
-	
-	level.maps_vote = [maps_size - 1 ];	
-	level.dsr_vote = [dsr_size - 1 ];	
-	
-	for(i = 0; i < maps_size; i++)
-		level.maps_vote[i] = 0;
-	
-	for(i = 0; i < dsr_size; i++)
-		level.dsr_vote[i] = 0;
-}
-
-OnGameOverServerInit()
-{
-	level waittill("vote_start");//game_over
+	level waittill("vote_start");//game_over	
 
 	level thread createTimerHud();
 	
 	createHudText("^7VOTE MAP", "hudsmall", 1.4, "RIGHT", "CENTER", -151, -190, false); 
 	createHudText("^7VOTE MODE", "hudsmall", 1.4, "RIGHT", "CENTER", -151, -30, false); 
 	
-	createHudText("^7Press [{+forward}] top up - Press [{+back}] to down - Press [{+gostand}] to select option - Press [{+melee_zoom}] to undo select", "hudsmall", 0.8, "CENTER", "CENTER", 0, 220, false); 
+	createHudText("^7Press [{+forward}] top up - Press [{+back}] to down - Press [{+activate}] to select option - Press [{+melee_zoom}] to undo select", "hudsmall", 0.8, "CENTER", "CENTER", 0, 210, false); 
 	
 	bg = createIconHud("background_image", "CENTER", "CENTER", 0, 0, 860, 480, (1,1,1), 1, 1, false); 
 	bg.hideWhenInMenu = false;
@@ -156,18 +118,24 @@ OnGameOverServerInit()
 	{
 		level.hudDsr[i] = createHudText(getDsrAlias(level.dsr_index[i]), "objective", 1.2, "RIGHT", "CENTER", -151, hudLastPosY, false); 
 		hudLastPosY += 20;
-	}	
+	}
+	
 	level thread UpdateVoteCount();
+	
+	for ( i = 0; i < level.players.size; i++ )
+		level.players[i] thread PlayerVoteInit();
 }
 
-OnGameOverPlayerInit()
+PlayerVoteInit()
 {
-	self endon("disconnect");
-	level waittill("vote_start");	
+	if(self.sessionteam == "spectator") return;
+	
+	self visionsetnakedforplayer("blacktest", 0);
+	self playlocalsound("elev_bell_ding");		
 	
 	self notifyonplayercommand("up", "+forward");
 	self notifyonplayercommand("down", "+back");
-	self notifyonplayercommand("select", "+gostand");
+	self notifyonplayercommand("select", "+activate");
 	self notifyonplayercommand("melee", "+melee_zoom");
 	
 	navbar = self createIconHud("gradient_fadein", "RIGHT", "CENTER", -125, -155, 340, 20, (0,1,0), 0.3, 3, true);
@@ -217,6 +185,7 @@ OnGameOverPlayerInit()
 				index = 0;
 				
 				self iprintln("^2You have vote map ^1" + getMapAlias(level.maps_index[selected[0]]));
+				self playlocalsound("recondrone_lockon");	
 			}
 			else if (!hasVoted[1])
 			{
@@ -225,6 +194,7 @@ OnGameOverPlayerInit()
 				level.dsr_vote[selected[1]]++;
 				
 				self iprintln("^2You have vote mode ^1" + getDsrAlias(level.dsr_index[selected[1]]));
+				self playlocalsound("recondrone_lockon");
 			}
 		}
 		else if (key == "melee")
@@ -236,6 +206,7 @@ OnGameOverPlayerInit()
 				selected[0] = -1;		
 				
 				self iprintln("^2You have ^1denied ^2your vote map");	
+				self playlocalsound("mine_betty_click");
 			}
 			else if (hasVoted[1])
 			{
@@ -243,9 +214,11 @@ OnGameOverPlayerInit()
 				hasVoted[1] = false;
 				selected[1] = -1;
 				
-				self iprintln("^2You have ^1denied ^2your vote mode");				
+				self iprintln("^2You have ^1denied ^2your vote mode");		
+				self playlocalsound("mine_betty_click");				
 			}
 		}
+		else self playlocalsound("elev_door_interupt");			
 		wait 0.05;
 	}
 }
@@ -286,7 +259,6 @@ OnEndVote()
 	//cmdexec("start_map_rotate");
 }
 
-
 getMap(index)
 {
 	return StrTok(level.maps[index], ";")[0];
@@ -307,6 +279,24 @@ getDsrAlias(index)
 	return StrTok(level.dsr[index], ";")[1];
 }
 
+SetRandomVote(maps_size, dsr_size)
+{
+	if(maps_size > 6 || dsr_size > 6) return;
+	if(maps_size > level.maps.size) return;
+	if(dsr_size > level.dsr.size) return;
+	
+	level.maps_index = randomNum(maps_size, 0, level.maps.size);	
+	level.dsr_index = randomNum(dsr_size, 0, level.dsr.size);	
+	
+	level.maps_vote = [maps_size - 1 ];	
+	level.dsr_vote = [dsr_size - 1 ];	
+	
+	for(i = 0; i < maps_size; i++)
+		level.maps_vote[i] = 0;
+	
+	for(i = 0; i < dsr_size; i++)
+		level.dsr_vote[i] = 0;
+}
 
 randomNum(size, min, max)
 {
@@ -364,10 +354,17 @@ createTimerHud()
 {
 	//the game hide or delete timer on game ended, with createServerTimer()
 	crappy_timer = createHudText("^2Vote end in: ", "hudsmall", 1.4, "RIGHT", "RIGHT", -50, 170, false);
+	soundFX = spawn( "script_origin", (0,0,0) );
+	soundFX hide();
+	
 	for (i = level.votetime; i > 0; i--)
 	{
 		if(i > 5) crappy_timer setText("^2Vote end in: " + i); 
-		else crappy_timer setText("^1Vote end in: " + i); 
+		else 
+		{
+			crappy_timer setText("^1Vote end in: " + i); 
+			soundFX playSound( "ui_mp_timer_countdown" );
+		}
 		wait(1);
 	}
 	level notify("vote_end");
