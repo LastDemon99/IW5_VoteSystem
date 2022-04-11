@@ -3,78 +3,41 @@
 #include maps\mp\_utility;
 
 init()
-{	
+{
 	loadData();
 	
-	level.voteTime = getDvarInt("vote_time");
-	level.voteMapsCount = getDvarInt("vote_maps_count");
-	level.voteDsrCount = getDvarInt("vote_dsr_count");
-	level.voteType = getDvarInt("vote_type");
 	level.voteHasStarted = false;
-	level.voteEnable = true;
+	level.voteHasError = false;
 	
-	level thread onCommand();
 	level thread voteInit();
 	level thread onEndVote();
 	level thread credits();
 	
     replacefunc(maps\mp\gametypes\_gamelogic::waittillFinalKillcamDone, ::onEndGame);	
+	
+	newdata = [];
+	dataItems = StrTok(getDvar("vote_maps"), ":");
+	for(i = 0; i < dataItems.size; i++)
+		newdata[i] = [StrTok(dataItems[i], ";")[0], StrTok(dataItems[i], ";")[1]];
+	printLn(newdata[0][1]);
 }
 
 loadData()
 {
-	setDvarIfNotInizialized("vote_time", 20);
+	setDvarIfNotInizialized("vote_enable", 1);
+	setDvarIfNotInizialized("vote_type", 1);
 	setDvarIfNotInizialized("vote_maps_count", 0);
 	setDvarIfNotInizialized("vote_dsr_count", 0);
-	setDvarIfNotInizialized("vote_type", 1);
+	setDvarIfNotInizialized("vote_time", 20);
 	
 	setDvar("vote_credits", "Developed by LastDemon99");
-	setDvar("vote_set_map", "");
-	setDvar("vote_unset_map", "");
-	setDvar("vote_set_dsr", "");
-	setDvar("vote_unset_dsr", "");
 	
 	shaders = StrTok("background_image;gradient;gradient_fadein;gradient_top", ";");
     foreach(shader in shaders)
         PreCacheShader(shader);
-	
-	level.maps = [];
-	level.maps[0] = ["mp_plaza2", "Arkaden"];
-	level.maps[1] = ["mp_mogadishu", "Bakaara"];
-	level.maps[2] = ["mp_bootleg", "Bootleg"];
-	level.maps[3] = ["mp_carbon", "Carbon"];
-	level.maps[4] = ["mp_dome", "Dome"];
-	level.maps[5] = ["mp_exchange", "Downturn"];
-	level.maps[6] = ["mp_lambeth", "Fallen"];
-	level.maps[7] = ["mp_hardhat", "Hardhat"];
-	level.maps[8] = ["mp_interchange", "Interchange"];
-	level.maps[9] = ["mp_alpha", "Lockdown"];
-	level.maps[10] = ["mp_bravo", "Mission"];
-	level.maps[11] = ["mp_radar", "Outpost"];
-	level.maps[12] = ["mp_paris", "Resistance"];
-	level.maps[13] = ["mp_seatown", "Seatown"];
-	level.maps[14] = ["mp_underground", "Underground"];
-	level.maps[15] = ["mp_village", "Village"];
-	
-	/* dlc maps
-	level.maps[16] = ["mp_morningwood", "Blackbox"];
-	level.maps[17] = ["mp_park", "Liberation"];
-	level.maps[18] = ["mp_qadeem", "Oasis"];
-	level.maps[19] = ["mp_overwatch", "Overwatch"];
-	level.maps[20] = ["mp_italy", "Piazza"];
-	level.maps[21] = ["mp_meteora", "Sanctuary"];
-	level.maps[22] = ["mp_cement", "Foundation"];
-	level.maps[23] = ["mp_aground_ss", "Aground"];
-	level.maps[24] = ["mp_hillside_ss", "Getaway"];
-	level.maps[25] = ["mp_restrepo_ss", "Lookout"];
-	level.maps[26] = ["mp_courtyard_ss", "Erosion"];
-	level.maps[27] = ["mp_terminal_cls", "Terminal"];*/
-	
-	level.dsr = [];
-	
-	/* dsr format
-	level.dsr[0] = ["inf", "Infected"];
-	level.dsr[1] = ["test", "TestName"];*/
+		
+	setDvarIfNotInizialized("vote_maps", "mp_plaza2;Arkaden:mp_mogadishu;Bakaara:mp_bootleg;Bootleg:mp_carbon;Carbon:mp_dome;Dome:mp_exchange;Downturn:mp_lambeth;Fallen:mp_hardhat;Hardhat:mp_interchange;Interchange:mp_alpha;Lockdown:mp_bravo;Mission:mp_radar;Outpost:mp_paris;Resistance:mp_seatown;Seatown:mp_underground;Underground:mp_village;Village");
+	setDvarIfNotInizialized("vote_dsr", "dsrName1;dsrAlias1;dsrName2;dsrAlias2:dsrName3;dsrAlias3");
 }
 
 voteInit()
@@ -140,7 +103,7 @@ voteTimerInit()
 	soundFX hide();
 	
 	timerhud = createTimer(&"Vote end in: ", "hudsmall", 1.4, "RIGHT", "RIGHT", -50, 170);		
-	for (i = level.voteTime; i > 0; i--)
+	for (i = getDvarInt("vote_time"); i > 0; i--)
 	{
 		timerhud.Color = (1, 1, 0);		
 		if(i < 5) 
@@ -255,51 +218,6 @@ playerVoteInit()
 	}
 }
 
-onCommand()
-{
-	for(;;) 
-    {
-		if(level.voteHasStarted) break;
-		
-		if (level.voteTime != getDvarInt("vote_time"))
-		{
-			if(getDvarInt("vote_time") < 0)
-				setDvar("vote_time", 0);
-			
-			level.voteTime = getDvarInt("vote_time");
-		}
-
-		if (level.voteMapsCount != getDvarInt("vote_maps_count"))
-		{
-			if(getDvarInt("vote_maps_count") > level.maps.size)
-				setDvar("vote_maps_count", level.maps.size);
-			
-			level.voteMapsCount = getDvarInt("vote_maps_count");
-		}
-		
-		if (level.voteDsrCount != getDvarInt("vote_dsr_count"))
-		{
-			if(getDvarInt("vote_dsr_count") > level.dsr.size)
-				setDvar("vote_dsr_count", level.dsr.size);
-			
-			level.voteDsrCount = getDvarInt("vote_dsr_count");
-		}
-		
-		if (level.voteType != getDvarInt("vote_type"))
-		{
-			if(getDvarInt("vote_type") > 1 || getDvarInt("vote_type") < 0)
-				setDvar("vote_type", 1);
-			
-			level.voteType = getDvarInt("vote_type");
-		}
-		
-		if(getDvar("vote_credits") != "Developed by LastDemon99")
-			setDvar("vote_credits", "Developed by LastDemon99");
-		
-		wait(0.35);
-	}
-}
-
 onEndGame() 
 {
     if (!IsDefined(level.finalkillcam_winner))
@@ -307,14 +225,16 @@ onEndGame()
 	    if (isRoundBased() && !wasLastRound())
 			return false;
 		
-		level thread setRandomVote(level.voteMapsCount, level.voteDsrCount);			
+		level dvarListToArray();
+		level thread setRandomVote(getDvarInt("vote_maps_count"), getDvarInt("vote_dsr_count"));			
 		wait 3;
 		
-		if(level.voteEnable)
+		if(getDvarInt("vote_enable") && !level.voteHasError)
 		{
 			level notify("vote_start");
 			level waittill("vote_end");
 		}
+		else reportError();
         return false;
     }
 	
@@ -322,14 +242,16 @@ onEndGame()
 	if (isRoundBased() && !wasLastRound())
 		return true;
 	
-	level thread setRandomVote(level.voteMapsCount, level.voteDsrCount);		
+	level dvarListToArray();
+	level thread setRandomVote(getDvarInt("vote_maps_count"), getDvarInt("vote_dsr_count"));		
 	wait 3;
 	
-	if(level.voteEnable)
+	if(getDvarInt("vote_enable") && !level.voteHasError)
 	{
 		level notify("vote_start");
 		level waittill("vote_end");
 	}
+	else reportError();
     return true;
 }
 
@@ -368,8 +290,8 @@ onEndVote()
 	
 	setDvar("sv_maprotation", "dsr " + _dsr + " map " + _map);
 	
-	if(level.voteType == 1) exitLevel(0);
-	else cmdexec("start_map_rotate");
+	if(getDvarInt("vote_type") == 1) exitLevel(0);
+	else cmdexec("start_map_rotate"); 
 }
 
 updateVoteCount()
@@ -393,9 +315,9 @@ updateVoteCount()
 
 setRandomVote(maps_size, dsr_size)
 {
-	if(maps_size > 6 || dsr_size > 6 || maps_size > level.maps.size || dsr_size > level.dsr.size || (maps_size <= 1 && dsr_size <= 1))
+	if(maps_size > level.maps.size || dsr_size > level.dsr.size || (maps_size <= 1 && dsr_size <= 1))
 	{
-		level.voteEnable = false;
+		level.voteHasError = true;
 		return;
 	}
 	
@@ -414,6 +336,12 @@ setRandomVote(maps_size, dsr_size)
 		
 		for(i = 0; i < dsr_size; i++)
 		level.dsr_vote[i] = 0;
+	}
+	
+	if((maps_size > 6 && isDefined(level.dsr_index)) || (dsr_size > 6 && isDefined(level.maps_index)))
+	{
+		level.voteHasError = true;
+		return;
 	}
 }
 
@@ -477,9 +405,22 @@ createTimer(label, font, size, align, relative, x, y)
 	timer.alpha = 1;
 	timer.hideWhenInMenu = true;
 	timer.foreground = true;
-	timer setTimer(level.voteTime);
+	timer setTimer(getDvarInt("vote_time"));
 	
 	return timer;
+}
+
+dvarListToArray()
+{
+	level.maps = [];	
+	dataItems = StrTok(getDvar("vote_maps"), ":");	
+	for(i = 0; i < dataItems.size; i++)
+		level.maps[i] = [StrTok(dataItems[i], ";")[0], StrTok(dataItems[i], ";")[1]];
+	
+	level.dsr = [];	
+	dataItems = StrTok(getDvar("vote_dsr"), ":");	
+	for(i = 0; i < dataItems.size; i++)
+		level.dsr[i] = [StrTok(dataItems[i], ";")[0], StrTok(dataItems[i], ";")[1]];
 }
 
 setDvarIfNotInizialized(dvar, value)
@@ -489,12 +430,20 @@ setDvarIfNotInizialized(dvar, value)
 		setDvar(dvar, value);
 }
 
+reportError()
+{
+	printLn("=================================================");
+	printLn("IW5_VoteSystem:: [ERROR]");
+	printLn("check the lenght or format from your maps and dsr");
+	printLn("=================================================");
+}
+
 credits()
 {
-	level waittill("prematch_over");
-	
-	printLn("=====================================================");
-	printLn("		IW5_VoteSystem script by LastDemon99");			
-	printLn("	https://github.com/LastDemon99/IW5_VoteSystem");
-	printLn("=====================================================");	
+	for(;;) 
+    {
+		if(getDvar("vote_credits") != "Developed by LastDemon99")
+			setDvar("vote_credits", "Developed by LastDemon99");		
+		wait(0.35);
+	}
 }
