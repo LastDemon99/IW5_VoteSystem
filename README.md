@@ -11,10 +11,8 @@
 </p>
 
 # <a name="key-features"></a>Key Features
-- This script will create a random list of maps and dsr at the end of the game to vote the next rotation
-- You can choose the maps and dsr to be displayed in the menu in a range between 1 and 6
-- The name that will be displayed in the menu for the respective item will be the one of your preference
-- The list shown in the menu is scrollable
+- This script will create a random list of maps and dsr at the end of the game with a drop down menu to vote the next rotation
+- The range of maps and dsr that will be displayed in the menu will be the one of your preference
 
 # <a name="how-to-use"></a>How To Use
 - Place the script file at "%localappdata%/plutonium/storage/iw5/scripts" if the folder does not exist, create it
