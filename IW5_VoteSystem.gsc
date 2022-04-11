@@ -3,94 +3,86 @@
 #include maps\mp\_utility;
 
 init()
-{
-	LoadData();
+{	
+	loadData();
 	
-	level thread VoteInit();
-	level thread OnEndVote();
+	level.voteTime = getDvarInt("vote_time");
+	level.voteMapsCount = getDvarInt("vote_maps_count");
+	level.voteDsrCount = getDvarInt("vote_dsr_count");
+	level.voteType = getDvarInt("vote_type");
+	level.voteHasStarted = false;
+	level.voteEnable = true;
 	
-    replacefunc(maps\mp\gametypes\_gamelogic::waittillFinalKillcamDone, ::_gamelogic_waittillFinalKillcamDone_custom);
+	level thread onCommand();
+	level thread voteInit();
+	level thread onEndVote();
+	level thread credits();
 	
-	//setDvar("scr_" + level.gametype + "_timelimit", 0.1);	
+    replacefunc(maps\mp\gametypes\_gamelogic::waittillFinalKillcamDone, ::onEndGame);	
 }
 
-_gamelogic_waittillFinalKillcamDone_custom() 
+loadData()
 {
-    if (!IsDefined(level.finalkillcam_winner))
-	{
-	    if (isRoundBased() && !wasLastRound())
-			return false;
-		
-		wait 3;
-        level notify("vote_start");
-		level waittill("vote_end");
-        return false;
-    }
+	setDvarIfNotInizialized("vote_time", 20);
+	setDvarIfNotInizialized("vote_maps_count", 0);
+	setDvarIfNotInizialized("vote_dsr_count", 0);
+	setDvarIfNotInizialized("vote_type", 1);
 	
-    level waittill("final_killcam_done");
-	if (isRoundBased() && !wasLastRound())
-		return true;
+	setDvar("vote_credits", "Developed by LastDemon99");
+	setDvar("vote_set_map", "");
+	setDvar("vote_unset_map", "");
+	setDvar("vote_set_dsr", "");
+	setDvar("vote_unset_dsr", "");
 	
-	wait 3;
-    level notify("vote_start");
-	level waittill("vote_end");
-    return true;
-}
-
-
-LoadData()
-{
-	level.votetime = 20;
 	shaders = StrTok("background_image;gradient;gradient_fadein;gradient_top", ";");
     foreach(shader in shaders)
         PreCacheShader(shader);
 	
-	level.maps = [ "mp_plaza2;Arkaden",
-            "mp_mogadishu;Bakaara",
-            "mp_bootleg;Bootleg",
-            "mp_carbon;Carbon",
-            "mp_dome;Dome",
-            "mp_exchange;Downturn",
-            "mp_lambeth;Fallen",
-            "mp_hardhat;Hardhat",
-            "mp_interchange;Interchange",
-            "mp_alpha;Lockdown",
-            "mp_bravo;Mission",
-            "mp_radar;Outpost",
-            "mp_paris;Resistance",
-            "mp_seatown;Seatown",
-            "mp_underground;Underground",
-            "mp_village;Village" ];
-            
-			//dlc maps
-			/*"mp_morningwood;Blackbox",
-            "mp_park;Liberation",
-            "mp_qadeem;Oasis",
-            "mp_overwatch;Overwatch",
-            "mp_italy;Piazza",
-            "mp_meteora;Sanctuary",
-            "mp_cement;Foundation",
-            "mp_aground_ss;Aground",
-            "mp_hillside_ss;Getaway",
-            "mp_restrepo_ss;Lookout",
-            "mp_courtyard_ss;Erosion",
-            "mp_terminal_cls;Terminal" ];*/
+	level.maps = [];
+	level.maps[0] = ["mp_plaza2", "Arkaden"];
+	level.maps[1] = ["mp_mogadishu", "Bakaara"];
+	level.maps[2] = ["mp_bootleg", "Bootleg"];
+	level.maps[3] = ["mp_carbon", "Carbon"];
+	level.maps[4] = ["mp_dome", "Dome"];
+	level.maps[5] = ["mp_exchange", "Downturn"];
+	level.maps[6] = ["mp_lambeth", "Fallen"];
+	level.maps[7] = ["mp_hardhat", "Hardhat"];
+	level.maps[8] = ["mp_interchange", "Interchange"];
+	level.maps[9] = ["mp_alpha", "Lockdown"];
+	level.maps[10] = ["mp_bravo", "Mission"];
+	level.maps[11] = ["mp_radar", "Outpost"];
+	level.maps[12] = ["mp_paris", "Resistance"];
+	level.maps[13] = ["mp_seatown", "Seatown"];
+	level.maps[14] = ["mp_underground", "Underground"];
+	level.maps[15] = ["mp_village", "Village"];
 	
-	//
+	/* dlc maps
+	level.maps[16] = ["mp_morningwood", "Blackbox"];
+	level.maps[17] = ["mp_park", "Liberation"];
+	level.maps[18] = ["mp_qadeem", "Oasis"];
+	level.maps[19] = ["mp_overwatch", "Overwatch"];
+	level.maps[20] = ["mp_italy", "Piazza"];
+	level.maps[21] = ["mp_meteora", "Sanctuary"];
+	level.maps[22] = ["mp_cement", "Foundation"];
+	level.maps[23] = ["mp_aground_ss", "Aground"];
+	level.maps[24] = ["mp_hillside_ss", "Getaway"];
+	level.maps[25] = ["mp_restrepo_ss", "Lookout"];
+	level.maps[26] = ["mp_courtyard_ss", "Erosion"];
+	level.maps[27] = ["mp_terminal_cls", "Terminal"];*/
 	
-	level.dsr = [ "ffa_sniper;iSnipe FFA", "ffa_os;Old School FFA", "inf_ss;SharpShooter Infected", "tdm_crank;Cranked TDM" ];
+	level.dsr = [];
 	
-	level thread SetRandomVote(6, 4);	
+	/* dsr format
+	level.dsr[0] = ["inf", "Infected"];
+	level.dsr[1] = ["test", "TestName"];*/
 }
 
-VoteInit()
+voteInit()
 {
-	level waittill("vote_start");//game_over	
+	level waittill("vote_start");	
+	level.voteHasStarted = true;	
 
-	level thread createTimerHud();
-	
-	createHudText("^7VOTE MAP", "hudsmall", 1.4, "RIGHT", "CENTER", -151, -190, false); 
-	createHudText("^7VOTE MODE", "hudsmall", 1.4, "RIGHT", "CENTER", -151, -30, false); 
+	level thread voteTimerInit();
 	
 	createHudText("^7Press [{+forward}] top up - Press [{+back}] to down - Press [{+activate}] to select option - Press [{+melee_zoom}] to undo select", "hudsmall", 0.8, "CENTER", "CENTER", 0, 210, false); 
 	
@@ -102,31 +94,67 @@ VoteInit()
 	createIconHud("gradient", "CENTER", "CENTER", -119, 0, 12, 480, (1,1,1), 0.5, 2, false); 
 	
 	createIconHud("gradient_fadein", "RIGHT", "CENTER", -125, -172, 220, 1, (0.48,0.51,0.46), 1, 3, false); 
-	createIconHud("gradient_fadein", "RIGHT", "CENTER", -125, -12, 220, 1, (0.48,0.51,0.46), 1, 3, false); 	
 	
-	level.hudMaps = [level.maps_index.size - 1];
-	level.hudDsr = [level.dsr_index.size - 1];
+	if(isDefined(level.maps_index) && isDefined(level.dsr_index))
+		createIconHud("gradient_fadein", "RIGHT", "CENTER", -125, -12, 220, 1, (0.48,0.51,0.46), 1, 3, false); 	
 	
 	hudLastPosY =  -155;
-	for (i = 0; i < level.maps_index.size; i++)
+	if(isDefined(level.maps_index))
 	{
-		level.hudMaps[i] = createHudText(getMapAlias(level.maps_index[i]), "objective", 1.2, "RIGHT", "CENTER", -151, hudLastPosY, false); 
-		hudLastPosY += 20;
-	}
-	hudLastPosY =  5;	
-	for (i = 0; i < level.dsr_index.size; i++)
-	{
-		level.hudDsr[i] = createHudText(getDsrAlias(level.dsr_index[i]), "objective", 1.2, "RIGHT", "CENTER", -151, hudLastPosY, false); 
-		hudLastPosY += 20;
+		createHudText("^7VOTE MAP", "hudsmall", 1.4, "RIGHT", "CENTER", -151, -190, false); 
+		
+		level.hudMaps = [level.maps_index.size - 1];
+		for (i = 0; i < level.maps_index.size; i++)
+		{
+			level.hudMaps[i] = createHudText(level.maps[level.maps_index[i]][1], "objective", 1.2, "RIGHT", "CENTER", -151, hudLastPosY, false); 
+			hudLastPosY += 20;
+		}
 	}
 	
-	level thread UpdateVoteCount();
+	if(isDefined(level.dsr_index))
+	{
+		if(isDefined(level.maps_index)) 
+		{
+			hudLastPosY =  5;
+			createHudText("^7VOTE MODE", "hudsmall", 1.4, "RIGHT", "CENTER", -151, -30, false); 
+		}			
+		else createHudText("^7VOTE MODE", "hudsmall", 1.4, "RIGHT", "CENTER", -151, -190, false); 
+		
+		level.hudDsr = [level.dsr_index.size - 1];
+		for (i = 0; i < level.dsr_index.size; i++)
+		{
+			level.hudDsr[i] = createHudText(level.dsr[level.dsr_index[i]][1], "objective", 1.2, "RIGHT", "CENTER", -151, hudLastPosY, false); 
+			hudLastPosY += 20;
+		}
+	}
+	
+	level thread updateVoteCount();
 	
 	for ( i = 0; i < level.players.size; i++ )
-		level.players[i] thread PlayerVoteInit();
+		level.players[i] thread playerVoteInit();
 }
 
-PlayerVoteInit()
+voteTimerInit()
+{
+	soundFX = spawn("script_origin", (0,0,0) );
+	soundFX hide();
+	
+	timerhud = createTimer(&"Vote end in: ", "hudsmall", 1.4, "RIGHT", "RIGHT", -50, 170);		
+	for (i = level.voteTime; i > 0; i--)
+	{
+		timerhud.Color = (1, 1, 0);		
+		if(i < 5) 
+		{
+			timerhud.Color = (1, 0, 0);
+			soundFX playSound( "ui_mp_timer_countdown" );
+		}
+		wait(1);
+	}
+	
+	level notify("vote_end");
+}
+
+playerVoteInit()
 {
 	if(self.sessionteam == "spectator") return;
 	
@@ -142,79 +170,83 @@ PlayerVoteInit()
 	navbar_shadow = self createIconHud("gradient_top", "RIGHT", "CENTER", -125, -145, 340, 4, (0,0,0), 1, 2, true);
 	
 	index = 0;
-	max_index = level.maps_index.size - 1;
-	hasVoted = [ false, false];
-	selected = [ -1, -1];
+	hasVoted = false;
+	selected = [];	
+	default_y = -155;
+	
+	if(isDefined(level.maps_index)) vote_type = "map";
+	else vote_type = "dsr";
 	
 	for(;;) 
 	{
-		if(!hasVoted[0]) 
+		if(vote_type == "map") 
 		{
 			default_y = -155;
 			max_index = level.maps_index.size - 1;
 		}
 		else 
 		{
-			default_y = 5;
+			if(isDefined(level.maps_index)) default_y = 5;
 			max_index = level.dsr_index.size - 1;
-		}	
-		
+		}
+ 		
 		navbar.y = default_y + index * 20;
-		navbar_shadow.y = (default_y - 10) + index * 20;
+		navbar_shadow.y = (default_y - 10) + index * 20;		
+		key = self waittill_any_return("up", "down", "select", "melee");		
 		
-		key = self waittill_any_return("up", "down", "select", "melee");			
-		if(key == "up" && !hasVoted[1])
+		if(key == "up" && !hasVoted)
 		{
 			if(index > 0) index --;
 			else index = max_index;
 			self playlocalsound("mouse_over");	
 		}
-		else if (key == "down" && !hasVoted[1])
+		else if (key == "down" && !hasVoted)
 		{
 			if(index < max_index) index++;
 			else index = 0;
 			self playlocalsound("mouse_over");	
 		}
-		else if (key == "select")
+		else if (key == "select" && !hasVoted)
 		{
-			if(!hasVoted[0])
+			if(vote_type == "map")
 			{
-				hasVoted[0] = true;
-				selected[0] = index;
-				level.maps_vote[selected[0]]++;
-				index = 0;
-				
-				self iprintln("^2You have vote map ^1" + getMapAlias(level.maps_index[selected[0]]));
-				self playlocalsound("recondrone_lockon");	
+				selected["map"] = index;
+				level.maps_vote[index]++;
+				if(isDefined(level.dsr_index))
+				{
+					vote_type = "dsr";
+					index = 0;
+				}
+				else hasVoted = true;
 			}
-			else if (!hasVoted[1])
+			else
 			{
-				hasVoted[1] = true;
-				selected[1] = index;
-				level.dsr_vote[selected[1]]++;
-				
-				self iprintln("^2You have vote mode ^1" + getDsrAlias(level.dsr_index[selected[1]]));
-				self playlocalsound("recondrone_lockon");
+				selected["dsr"] = index;
+				level.dsr_vote[index]++;
+				hasVoted = true;
 			}
+			
+			self playlocalsound("recondrone_lockon");
 		}
 		else if (key == "melee")
 		{
-			if(hasVoted[0] && !hasVoted[1])
+			if((vote_type == "map" && hasVoted) || (isDefined(level.dsr_index) && vote_type == "dsr" && !hasVoted))
 			{
-				level.maps_vote[selected[0]]--;
-				hasVoted[0] = false;
-				selected[0] = -1;		
+				level.maps_vote[selected["map"]]--;
+				selected["map"] = undefined;
+				if(!isDefined(level.dsr_index)) hasVoted = false;
+				else vote_type = "map";
 				
-				self iprintln("^2You have ^1denied ^2your vote map");	
+				index = 0;
 				self playlocalsound("mine_betty_click");
 			}
-			else if (hasVoted[1])
+			else if(vote_type == "dsr" && hasVoted)
 			{
-				level.dsr_vote[selected[1]]--;
-				hasVoted[1] = false;
-				selected[1] = -1;
+				level.dsr_vote[selected["dsr"]]--;
+				selected["dsr"] = undefined;
+				hasVoted = false;
 				
-				self iprintln("^2You have ^1denied ^2your vote mode");		
+				index = 0;
 				self playlocalsound("mine_betty_click");				
 			}
 		}
@@ -223,79 +255,166 @@ PlayerVoteInit()
 	}
 }
 
-UpdateVoteCount()
+onCommand()
 {
-	for(;;)
-	{
-		for (i = 0; i < level.maps_index.size; i++)
-			level.hudMaps[i] setText("^7[" + level.maps_vote[i] + "] " + getMapAlias(level.maps_index[i]));
+	for(;;) 
+    {
+		if(level.voteHasStarted) break;
 		
-		for (i = 0; i < level.dsr_index.size; i++)
-			level.hudDsr[i] setText("^7[" + level.dsr_vote[i] + "] " + getDsrAlias(level.dsr_index[i])); 
-		wait(0.05);
+		if (level.voteTime != getDvarInt("vote_time"))
+		{
+			if(getDvarInt("vote_time") < 0)
+				setDvar("vote_time", 0);
+			
+			level.voteTime = getDvarInt("vote_time");
+		}
+
+		if (level.voteMapsCount != getDvarInt("vote_maps_count"))
+		{
+			if(getDvarInt("vote_maps_count") > level.maps.size)
+				setDvar("vote_maps_count", level.maps.size);
+			
+			level.voteMapsCount = getDvarInt("vote_maps_count");
+		}
+		
+		if (level.voteDsrCount != getDvarInt("vote_dsr_count"))
+		{
+			if(getDvarInt("vote_dsr_count") > level.dsr.size)
+				setDvar("vote_dsr_count", level.dsr.size);
+			
+			level.voteDsrCount = getDvarInt("vote_dsr_count");
+		}
+		
+		if (level.voteType != getDvarInt("vote_type"))
+		{
+			if(getDvarInt("vote_type") > 1 || getDvarInt("vote_type") < 0)
+				setDvar("vote_type", 1);
+			
+			level.voteType = getDvarInt("vote_type");
+		}
+		
+		if(getDvar("vote_credits") != "Developed by LastDemon99")
+			setDvar("vote_credits", "Developed by LastDemon99");
+		
+		wait(0.35);
 	}
 }
 
-OnEndVote()
+onEndGame() 
+{
+    if (!IsDefined(level.finalkillcam_winner))
+	{
+	    if (isRoundBased() && !wasLastRound())
+			return false;
+		
+		level thread setRandomVote(level.voteMapsCount, level.voteDsrCount);			
+		wait 3;
+		
+		if(level.voteEnable)
+		{
+			level notify("vote_start");
+			level waittill("vote_end");
+		}
+        return false;
+    }
+	
+    level waittill("final_killcam_done");
+	if (isRoundBased() && !wasLastRound())
+		return true;
+	
+	level thread setRandomVote(level.voteMapsCount, level.voteDsrCount);		
+	wait 3;
+	
+	if(level.voteEnable)
+	{
+		level notify("vote_start");
+		level waittill("vote_end");
+	}
+    return true;
+}
+
+onEndVote()
 {
 	level waittill("vote_end");
 	
 	level.winMap = [ 0, 0 ];
 	level.winDSR = [ 0, 0 ];
 	
-	for (i = 0; i < level.maps_index.size; i++)
-		if(level.winMap[0] < level.maps_vote[i])
-				level.winMap = [ level.maps_vote[i], i];
-			
-	for (i = 0; i < level.dsr_index.size; i++)
-		if(level.winDSR[0] < level.dsr_vote[i])
-				level.winDSR = [ level.dsr_vote[i], i];
-
-	if (level.winMap[0] == 0 && level.winMap[1] == 0) level.winMap[1] = randomIntRange(0, level.maps_vote.size);
-	if (level.winDSR[0] == 0 && level.winDSR[1] == 0) level.winDSR[1] = randomIntRange(0, level.dsr_vote.size);	
+	if(isDefined(level.maps_index))
+	{
+		for (i = 0; i < level.maps_index.size; i++)
+			if(level.winMap[0] < level.maps_vote[i])
+					level.winMap = [ level.maps_vote[i], i];
+				
+		if (level.winMap[0] == 0 && level.winMap[1] == 0) level.winMap[1] = randomIntRange(0, level.maps_vote.size);
+	}
 	
-    setDvar("sv_maprotation", "dsr " + getDsr(level.dsr_index[level.winDSR[1]]) + " map " + getMap(level.maps_index[level.winMap[1]]));
-	exitLevel(0);
-	//cmdexec("start_map_rotate");
-}
-
-getMap(index)
-{
-	return StrTok(level.maps[index], ";")[0];
-}
-
-getMapAlias(index)
-{
-	return StrTok(level.maps[index], ";")[1];
-}
-
-getDsr(index)
-{
-	return StrTok(level.dsr[index], ";")[0];
-}
-
-getDsrAlias(index)
-{
-	return StrTok(level.dsr[index], ";")[1];
-}
-
-SetRandomVote(maps_size, dsr_size)
-{
-	if(maps_size > 6 || dsr_size > 6) return;
-	if(maps_size > level.maps.size) return;
-	if(dsr_size > level.dsr.size) return;
+	if(isDefined(level.dsr_index))
+	{
+		for (i = 0; i < level.dsr_index.size; i++)
+			if(level.winDSR[0] < level.dsr_vote[i])
+					level.winDSR = [ level.dsr_vote[i], i];
+				
+		if (level.winDSR[0] == 0 && level.winDSR[1] == 0) level.winDSR[1] = randomIntRange(0, level.dsr_vote.size);	
+	}
 	
-	level.maps_index = randomNum(maps_size, 0, level.maps.size);	
-	level.dsr_index = randomNum(dsr_size, 0, level.dsr.size);	
+	oldMapRotation = StrTok(getDvar("sv_maprotation"), " ");
 	
-	level.maps_vote = [maps_size - 1 ];	
-	level.dsr_vote = [dsr_size - 1 ];	
+	if(!isDefined(level.dsr_index)) _dsr = oldMapRotation[1];
+	else _dsr = level.dsr[level.dsr_index[level.winDSR[1]]][0];
 	
-	for(i = 0; i < maps_size; i++)
+	if(!isDefined(level.maps_index)) _map = getdvar("mapname");
+	else _map = level.maps[level.maps_index[level.winMap[1]]][0];
+	
+	setDvar("sv_maprotation", "dsr " + _dsr + " map " + _map);
+	
+	if(level.voteType == 1) exitLevel(0);
+	else cmdexec("start_map_rotate");
+}
+
+updateVoteCount()
+{
+	for(;;)
+	{
+		if(isDefined(level.maps_index))
+		{
+			for (i = 0; i < level.maps_index.size; i++)
+				level.hudMaps[i] setText("^7[" + level.maps_vote[i] + "] " + level.maps[level.maps_index[i]][1]);
+		}
+		
+		if(isDefined(level.dsr_index))
+		{
+			for (i = 0; i < level.dsr_index.size; i++)
+				level.hudDsr[i] setText("^7[" + level.dsr_vote[i] + "] " + level.dsr[level.dsr_index[i]][1]); 
+		}
+		wait(0.05);
+	}
+}
+
+setRandomVote(maps_size, dsr_size)
+{
+	if(maps_size > 6 || dsr_size > 6 || maps_size > level.maps.size || dsr_size > level.dsr.size || (maps_size <= 1 && dsr_size <= 1))
+	{
+		level.voteEnable = false;
+		return;
+	}
+	
+	if(maps_size >= 1) 
+	{
+		level.maps_index = randomNum(maps_size, 0, level.maps.size);
+		level.maps_vote = [maps_size - 1 ];	
+		
+		for(i = 0; i < maps_size; i++)
 		level.maps_vote[i] = 0;
-	
-	for(i = 0; i < dsr_size; i++)
+	}
+	if(dsr_size >= 1)
+	{
+		level.dsr_index = randomNum(dsr_size, 0, level.dsr.size);	
+		level.dsr_vote = [dsr_size - 1 ];	
+		
+		for(i = 0; i < dsr_size; i++)
 		level.dsr_vote[i] = 0;
+	}
 }
 
 randomNum(size, min, max)
@@ -350,22 +469,32 @@ createIconHud(shader, align, relative, x, y, width, height, color, alpha, sort, 
     return hudIcon;
 }
 
-createTimerHud()
+createTimer(label, font, size, align, relative, x, y)
 {
-	//the game hide or delete timer on game ended, with createServerTimer()
-	crappy_timer = createHudText("^2Vote end in: ", "hudsmall", 1.4, "RIGHT", "RIGHT", -50, 170, false);
-	soundFX = spawn( "script_origin", (0,0,0) );
-	soundFX hide();
+	timer = createServerTimer(font, size);	
+	timer setpoint(align, relative, x, y);
+	timer.label = label; 
+	timer.alpha = 1;
+	timer.hideWhenInMenu = true;
+	timer.foreground = true;
+	timer setTimer(level.voteTime);
 	
-	for (i = level.votetime; i > 0; i--)
-	{
-		if(i > 5) crappy_timer setText("^2Vote end in: " + i); 
-		else 
-		{
-			crappy_timer setText("^1Vote end in: " + i); 
-			soundFX playSound( "ui_mp_timer_countdown" );
-		}
-		wait(1);
-	}
-	level notify("vote_end");
+	return timer;
+}
+
+setDvarIfNotInizialized(dvar, value)
+{
+	result = getDvar(dvar);	
+	if(!isDefined(result) || result == "")
+		setDvar(dvar, value);
+}
+
+credits()
+{
+	level waittill("prematch_over");
+	
+	printLn("=====================================================");
+	printLn("		IW5_VoteSystem script by LastDemon99");			
+	printLn("	https://github.com/LastDemon99/IW5_VoteSystem");
+	printLn("=====================================================");	
 }
