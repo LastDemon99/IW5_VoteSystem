@@ -18,11 +18,30 @@
 
 # <a name="how-to-use"></a>How To Use
 - Place the script file at "%localappdata%/plutonium/storage/iw5/scripts" if the folder does not exist, create it
-- Modify the [level.maps](https://github.com/LastDemon99/IW5_GSC_VoteMode/blob/baf2ea0f2c180e7841d007555f36cb2aafaf7488/IW5_VoteSystem.gsc#L48) array to set the range of the maps, and modify the [level.dsr](https://github.com/LastDemon99/IW5_GSC_VoteMode/blob/baf2ea0f2c180e7841d007555f36cb2aafaf7488/IW5_VoteSystem.gsc#L81) array with the dsr of your server
-- Specify the range of maps and dsr to display in the function [SetRandomVote()](https://github.com/LastDemon99/IW5_GSC_VoteMode/blob/baf2ea0f2c180e7841d007555f36cb2aafaf7488/IW5_VoteSystem.gsc#L83)
-- If your server does not have a map rotation or a serverAdmin, comment out the line containing ["exitLevel(0);"](https://github.com/LastDemon99/IW5_GSC_VoteMode/blob/baf2ea0f2c180e7841d007555f36cb2aafaf7488/IW5_VoteSystem.gsc#L258) and uncomment this line [//cmdexec("start_map_rotate");](https://github.com/LastDemon99/IW5_GSC_VoteMode/blob/baf2ea0f2c180e7841d007555f36cb2aafaf7488/IW5_VoteSystem.gsc#L259)
+- To configure the script you can set the following dvars in your server config or in the game console
+
+- Enable or disable voting at the end of the game 
+	>vote_enable
+
+- Number of maps to be shown in the vote, maximum 6, if the value is 0 or 1 no map will be shown allowing to increase the maximum of vote_dsr_count as long as it does not exceed the length of the list
+	>vote_maps_count
+
+- Number of dsr to be shown in the vote, maximum 6, if the value is 0 or 1 no dsr will be shown allowing to increase the maximum of vote_map_count as long as it does not exceed the length of the list
+	>vote_dsr_count
+
+- Voting time in seconds 
+	>vote_time 
+
+- For the private match or if your server does not have rotation set 0
+	>vote_type
+
+- Either to set the map or the dsr you will have to use the following format "name;alias" to add more  elements split it with a ":"
+	>vote_maps "name1;alias1:name2;alias2"
+	>vote_dsr "name1;alias1:name2;alias2"
+
+
+- The config file: [Config](https://github.com/LastDemon99/IW5_VoteSystem/blob/main/config.cfg) 
 - To interact with the menu press the keys that appear at the bottom of the screen
-- In future updates, modifications can be made in a simpler way
 
 # <a name="download"></a>Download
 - Download the .gsc file from the main repository
