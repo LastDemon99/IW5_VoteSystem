@@ -45,6 +45,7 @@
 - Download the .gsc file from the main repository
 
 # <a name="credits"></a>Credits
+- LethalBeats Team
 - The Plutonium team for gsc implementation
 - Special thanks to Swifty for solving doubts, testing and fixing part of the code: [Swifty](https://github.com/swifty-tekno) 
 - Plutonium discord community for solving doubts
