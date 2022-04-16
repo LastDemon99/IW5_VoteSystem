@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/LastDemon99/LastDemon99/blob/main/Data/IW5_VoteSystem_v1.png">
+  <img src="https://github.com/LastDemon99/LastDemon99/blob/main/Data/IW5_VoteSystem.png">
   <br><br>
   <b>IW5_VoteSystem</b><br>
   <a>GSC script for plutonium, a dynamic hud for selecting maps and game modes</a> 
