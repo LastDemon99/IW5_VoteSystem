@@ -223,13 +223,6 @@ loadData()
 		
 	setDvarIfNotInizialized("vote_maps", "mp_plaza2;Arkaden:mp_mogadishu;Bakaara:mp_bootleg;Bootleg:mp_carbon;Carbon:mp_dome;Dome:mp_exchange;Downturn:mp_lambeth;Fallen:mp_hardhat;Hardhat:mp_interchange;Interchange:mp_alpha;Lockdown:mp_bravo;Mission:mp_radar;Outpost:mp_paris;Resistance:mp_seatown;Seatown:mp_underground;Underground:mp_village;Village");
 	setDvarIfNotInizialized("vote_dsr", "");
-	
-	setDvarIfNotInizialized("vote_set_dsr", "");
-	setDvarIfNotInizialized("vote_unset_dsr", "");
-	setDvarIfNotInizialized("vote_set_map", "");
-	setDvarIfNotInizialized("vote_unset_map", "");
-	
-	setDvarIfNotInizialized("vote_credits", "Developed by LastDemon99");
 }
 
 onEndGame() 
