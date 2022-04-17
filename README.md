@@ -10,6 +10,7 @@
   <a href="#how-to-use">How To Use</a> •
   <a href="#download">Download</a> •  
   <a href="#credits">Credits</a> •
+  <a href="#donate">Donate</a> •
 </p>
 
 # <a name="key-features"></a>Key Features
@@ -51,3 +52,7 @@
 - The Plutonium team for gsc implementation
 - Special thanks to Swifty for solving doubts, testing and fixing part of the code: [Swifty](https://github.com/swifty-tekno) 
 - Plutonium discord community for solving doubts
+
+# <a name="donate"></a>Donate
+<a href="https://www.paypal.com/paypalme/lastdemon99/"><img src="https://github.com/LastDemon99/LastDemon99/blob/main/Data/paypal_dark.svg" height="40"></a>  
+If you liked this project and you want to collaborate for the creation of more you can donate here :3
