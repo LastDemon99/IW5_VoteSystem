@@ -33,7 +33,7 @@
 - Voting time in seconds 
 	>vote_time 
 
-- For the private match or if your server does not have rotation set 0
+- For the private match
 	>vote_type
 
 - Either to set the map or the dsr you will have to use the following format "name;alias" to add more  elements split it with a ":"
