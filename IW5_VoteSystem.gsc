@@ -4,6 +4,10 @@
 
 init()
 {
+	setDvar("scr_" + level.gametype + "_timelimit", 0.1);    
+	setDvar("scr_game_matchstarttime", 5);
+	setDvar("scr_game_playerwaittime", 5);
+	
 	loadData();
 	
 	level thread voteInit();	
@@ -39,73 +43,45 @@ voteInit()
 	
 	level waittill("vote_end");
 	
-	winMap = "";
-	winMapVotes = 0;
+	winMap = [level.voteMaps[randomIntRange(0, level.voteMaps.size)], getDvar("g_gametype"), 0];
 	MapRepeats = [];
 	
-	winDSR = "";
-	winDsrVotes = 0;
+	winDSR = [level.voteDsr[randomIntRange(0, level.voteDsr.size)], getDvar("g_gametype"), 0];
 	DSRRepeats = [];
 	
 	if(level.voteMapsEnabled)
 	{
 		for (i = 0; i < level.voteMaps.size; i++)
-			if(winMapVotes < level.voteMaps[i][2])
-				winMapVotes = level.voteMaps[i][2];
-		
+			if(winMap[2] < level.voteMaps[i][2])
+				winMap = level.voteMaps[i];
+			
 		for (i = 0; i < level.voteMaps.size; i++)
-			if(winMapVotes == level.voteMaps[i][2])
+			if(winMap[2] == level.voteMaps[i][2])
 				MapRepeats[MapRepeats.size] = level.voteMaps[i];
 		
-		if(MapRepeats.size > 0)
-		{
-			_win = MapRepeats[randomIntRange(0, MapRepeats.size)];
-			winMapVotes = _win[2];
-			winMap = _win[0];
-		}			
-		else
-		{
-			winMapVotes = level.voteMaps[i][2];
-			winMap = level.voteMaps[i][0];
-		}		
-		
-		if (winMap == "" && level.mapsEnabled) winMap = level.voteMaps[randomIntRange(0, level.voteMaps.size)][0];
+		if(MapRepeats.size > 0) winMap = MapRepeats[randomIntRange(0, MapRepeats.size)];
 	}
 	
 	if(level.voteDsrEnabled)
 	{
 		for (i = 0; i < level.voteDsr.size; i++)
-			if(winDsrVotes < level.voteDsr[i][2])
-				winDsrVotes = level.voteDsr[i][2];
+			if(winDSR[2] < level.voteDsr[i][2])
+				winDSR = level.voteDsr[i];
 			
 		for (i = 0; i < level.voteDsr.size; i++)
-			if(winDsrVotes == level.voteDsr[i][2])
+			if(winDSR[2] == level.voteDsr[i][2])
 				DSRRepeats[DSRRepeats.size] = level.voteDsr[i];
 			
-		if(DSRRepeats.size > 0)
-		{
-			_win = DSRRepeats[randomIntRange(0, DSRRepeats.size)];
-			winDsrVotes = _win[2];
-			winDSR = _win[0];
-		}			
-		else
-		{
-			winDsrVotes = level.voteDsr[i][2];
-			winDSR = level.voteDsr[i][0];
-		}
-		
-		if (winDSR == "" && level.dsrEnabled) winDSR = level.voteDsr[randomIntRange(0, level.voteDsr.size)][0];
+		if(DSRRepeats.size > 0) winDSR = DSRRepeats[randomIntRange(0, DSRRepeats.size)];
 	}
 	
-	oldMapRotation = StrTok(getDvar("sv_maprotation"), " ");
+	if (isSubStr(winDSR[0], "ss_")) setDvar("lb_customMode", "SharpShooter");
+	else if (isSubStr(winDSR[0], "os_")) setDvar("lb_customMode", "OldSchool");
+	else setDvar("lb_customMode", winDSR[1]);	
 	
-	if (winMap == "") winMap = getdvar("mapname");
-	if (winDSR == "") winDSR = oldMapRotation[1];
-	
-	setDvar("sv_maprotation", "dsr " + winDSR + " map " + winMap);
-	
-	if(getDvarInt("vote_type") == 1) exitLevel(0);
-	else cmdexec("start_map_rotate"); 
+	cmdexec("load_dsr " + winDSR[0]);
+	wait(3);
+	cmdexec("map " + winMap[0]);
 }
 
 playerVoteInit()
@@ -244,7 +220,6 @@ playerVoteInit()
 loadData()
 {
 	setDvarIfNotInizialized("vote_enable", 1);
-	setDvarIfNotInizialized("vote_type", 1);
 	setDvarIfNotInizialized("vote_maps_count", 0);
 	setDvarIfNotInizialized("vote_dsr_count", 0);
 	setDvarIfNotInizialized("vote_time", 20);
