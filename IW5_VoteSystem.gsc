@@ -102,10 +102,6 @@ voteInit()
 	if (winMap == "") winMap = getdvar("mapname");
 	if (winDSR == "") winDSR = oldMapRotation[1];
 	
-	if (isSubStr(winDSR, "ss_")) setDvar("lb_customMode", "SharpShooter");
-	else if (isSubStr(winDSR, "os_")) setDvar("lb_customMode", "OldSchool");
-	else setDvar("lb_customMode", "");
-	
 	setDvar("sv_maprotation", "dsr " + winDSR + " map " + winMap);
 	
 	if(getDvarInt("vote_type") == 1) exitLevel(0);
