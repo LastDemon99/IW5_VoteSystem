@@ -4,10 +4,6 @@
 
 init()
 {
-	setDvar("scr_" + level.gametype + "_timelimit", 0.1);    
-	setDvar("scr_game_matchstarttime", 5);
-	setDvar("scr_game_playerwaittime", 5);
-	
 	loadData();
 	
 	level thread voteInit();	
@@ -91,7 +87,6 @@ playerVoteInit()
 
 	if(self.sessionteam == "spectator") return;
 	
-	self visionsetnakedforplayer("blacktest", 0);
 	self playlocalsound("elev_bell_ding");		
 	
 	self notifyonplayercommand("up", "+forward");
