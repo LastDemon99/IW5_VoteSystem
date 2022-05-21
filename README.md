@@ -42,7 +42,7 @@
 - To interact with the menu press the keys that appear at the bottom of the screen
 
 # <a name="download"></a>Download
-- Download the .gsc file from the main repository
+- Download v0.2.4: [IW5_VoteSystem](https://github.com/LastDemon99/IW5_VoteSystem/releases/download/v0.2.4/IW5_VoteSystem.gsc)
 
 # <a name="credits"></a>Credits
 - LethalBeats Team
