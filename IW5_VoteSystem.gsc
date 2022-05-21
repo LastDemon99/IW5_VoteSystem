@@ -70,11 +70,7 @@ voteInit()
 			
 		if(DSRRepeats.size > 0) winDSR = DSRRepeats[randomIntRange(0, DSRRepeats.size)];
 	}
-	
-	if (isSubStr(winDSR[0], "ss_")) setDvar("lb_customMode", "SharpShooter");
-	else if (isSubStr(winDSR[0], "os_")) setDvar("lb_customMode", "OldSchool");
-	else setDvar("lb_customMode", winDSR[1]);	
-	
+		
 	cmdexec("load_dsr " + winDSR[0]);
 	wait(3);
 	cmdexec("map " + winMap[0]);
