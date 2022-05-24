@@ -10,7 +10,7 @@
   <a href="#how-to-use">How To Use</a> •
   <a href="#download">Download</a> •  
   <a href="#credits">Credits</a> •
-  <a href="#sonate">Sponsor</a> •
+  <a href="#sponsor">Sponsor</a> •
 </p>
 
 # <a name="key-features"></a>Key Features
