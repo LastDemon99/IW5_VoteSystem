@@ -51,5 +51,5 @@
 - Plutonium discord community for solving doubts
 
 # <a name="donate"></a>Donate
-<a href="https://www.patreon.com/RandomScriptsIW5"><img src="https://github.com/LastDemon99/LastDemon99/blob/main/Data/patreon_dark.png" height="40"></a>  
-If you liked this project and you want to collaborate for the creation of more you can donate here :3
+<a href="https://www.patreon.com/RandomScriptsIW5"><img src="https://github.com/LastDemon99/LastDemon99/blob/main/Data/patreon_dark.png" height="60"></a>  
+if you want to help me create more content and have access and preview in advance, support me in patreon :3
