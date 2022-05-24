@@ -1,3 +1,14 @@
+/*
+============================
+|   Lethal Beats Team	   |
+============================
+|Game : IW5                |
+|Script : IW5_VoteSystem   |
+|Creator : LastDemon99	   |
+|Type : Addon              |
+============================
+*/
+
 #include maps\mp\gametypes\_hud_util;
 #include common_scripts\utility;
 #include maps\mp\_utility;
