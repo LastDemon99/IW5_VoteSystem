@@ -10,7 +10,7 @@
   <a href="#how-to-use">How To Use</a> •
   <a href="#download">Download</a> •  
   <a href="#credits">Credits</a> •
-  <a href="#donate">Donate</a> •
+  <a href="#donate">Sponsor</a> •
 </p>
 
 # <a name="key-features"></a>Key Features
@@ -50,6 +50,6 @@
 - Special thanks to Swifty for solving doubts, testing and fixing part of the code: [Swifty](https://github.com/swifty-tekno) 
 - Plutonium discord community for solving doubts
 
-# <a name="donate"></a>Donate
+# <a name="Sponsor"></a>Donate
 <a href="https://www.patreon.com/RandomScriptsIW5"><img src="https://github.com/LastDemon99/LastDemon99/blob/main/Data/patreon_dark.png" height="60"></a>  
 if you want to help me create more content and have access and preview in advance, support me in patreon :3
